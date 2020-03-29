@@ -1,0 +1,7 @@
+dialect: postgres
+host:
+port:
+user:
+dbname:
+password:
+sslmode:

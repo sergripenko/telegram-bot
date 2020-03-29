@@ -2,20 +2,9 @@
 
 
 [[projects]]
-  digest = "1:2af97239e7c8b9e91668a9db6b5fd05b112c71da76e08b6288083a55f4745600"
+  digest = "1:201c30501114b6b7e6e2a086bd70c26789bbf79325da6c8825edab89aa4579cc"
   name = "github.com/astaxie/beego"
-  packages = [
-    ".",
-    "config",
-    "context",
-    "context/param",
-    "grace",
-    "logs",
-    "orm",
-    "session",
-    "toolbox",
-    "utils",
-  ]
+  packages = ["orm"]
   pruneopts = "UT"
   revision = "de5650b7230083f957045890af942ffdac87c782"
   version = "v1.12.1"
@@ -29,23 +18,12 @@
   version = "v4.6.4"
 
 [[projects]]
-  digest = "1:e40b74b04fa9a70ff39869139c9fd15ec9a9eefde3f51ef3b65405a60ce30e0e"
+  digest = "1:151bfbb1bc3287048f8c7dc7921151f6727191c641bbb077345e4624f9e19f9d"
   name = "github.com/jinzhu/gorm"
-  packages = [
-    ".",
-    "dialects/postgres",
-  ]
+  packages = ["dialects/postgres"]
   pruneopts = "UT"
   revision = "79a77d771dee4e4b60e9c543e8663bbc80466670"
   version = "v1.9.12"
-
-[[projects]]
-  digest = "1:01ed62f8f4f574d8aff1d88caee113700a2b44c42351943fa73cc1808f736a50"
-  name = "github.com/jinzhu/inflection"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f5c5f50e6090ae76a29240b61ae2a90dd810112e"
-  version = "v1.0.0"
 
 [[projects]]
   digest = "1:9bc108827ac1d8783dea294f1ef07732fa4ca7d6e20518c04888a85828eba4ce"
@@ -88,14 +66,6 @@
   version = "v0.0.12"
 
 [[projects]]
-  branch = "master"
-  digest = "1:44fbfce27cb96b7d20217634af466093485a3e8132820acbe95949cb64e7fc60"
-  name = "github.com/shiena/ansicolor"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "a422bbe96644373c5753384a59d678f7d261ff10"
-
-[[projects]]
   digest = "1:420817f94b6c172dabb8a054d0b2d257d7437a87c7c8c7ee432bc008a577fc46"
   name = "github.com/technoweenie/multipartstreamer"
   packages = ["."]
@@ -121,55 +91,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9a9cf26f20c88b890e03544ed6fc8b04f59f6d618e32a4de2b4b23f61d344580"
-  name = "golang.org/x/crypto"
-  packages = [
-    "acme",
-    "acme/autocert",
-  ]
-  pruneopts = "UT"
-  revision = "0ec3e9974c59449edd84298612e9f16fa13368e8"
-
-[[projects]]
-  branch = "master"
-  digest = "1:d1f7edf951b9cc444358a31de2f4e4c1c5c539ea9c6aca13f5bf92eb1124fc4b"
-  name = "golang.org/x/net"
-  packages = ["idna"]
-  pruneopts = "UT"
-  revision = "d3edc9973b7eb1fb302b0ff2c62357091cea9a30"
-
-[[projects]]
-  branch = "master"
   digest = "1:7d9e0fca00623428d7d22eb5aceb40b7e44c5396d921282de33d83fd79dce51d"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
   revision = "9dae0f8f577553e0f21298e18926efc9644c281d"
-
-[[projects]]
-  digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
-  name = "golang.org/x/text"
-  packages = [
-    "collate",
-    "collate/build",
-    "internal/colltab",
-    "internal/gen",
-    "internal/language",
-    "internal/language/compact",
-    "internal/tag",
-    "internal/triegen",
-    "internal/ucd",
-    "language",
-    "secure/bidirule",
-    "transform",
-    "unicode/bidi",
-    "unicode/cldr",
-    "unicode/norm",
-    "unicode/rangetable",
-  ]
-  pruneopts = "UT"
-  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
-  version = "v0.3.2"
 
 [[projects]]
   digest = "1:55b110c99c5fdc4f14930747326acce56b52cfce60b24b1c03ef686ac0e46bb1"
@@ -183,10 +109,8 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/astaxie/beego",
     "github.com/astaxie/beego/orm",
     "github.com/go-telegram-bot-api/telegram-bot-api",
-    "github.com/jinzhu/gorm",
     "github.com/jinzhu/gorm/dialects/postgres",
     "github.com/labstack/gommon/log",
     "gopkg.in/yaml.v2",

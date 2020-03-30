@@ -1,6 +1,9 @@
 package models
 
-import "github.com/astaxie/beego/orm"
+import (
+	"github.com/astaxie/beego/orm"
+	"github.com/labstack/gommon/log"
+)
 
 type Users struct {
 	Id        int    `orm:"column(id);pk;auto" json:"id"`
@@ -21,8 +24,13 @@ func init() {
 
 // AddUsers insert a new User into database and returns
 // last inserted Id on success.
-func AddUser(m *Users) (id int64, err error) {
+func AddNewUser(u *Users) {
 	o := orm.NewOrm()
-	id, err = o.Insert(m)
-	return
+	exist := o.QueryTable(new(Users)).Filter("chat_id", u.ChatID).Exist()
+
+	if !exist {
+		_, _ = o.Insert(u)
+		return
+	}
+	log.Info("user already exist")
 }

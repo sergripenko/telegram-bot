@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	TelegramToken string `yaml:"telegram_token"`
+	WeatherAppId  string `yaml:"weather_appid"`
 }
 
 func GetConfig() (Config, error) {

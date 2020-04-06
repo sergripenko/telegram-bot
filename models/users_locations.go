@@ -32,8 +32,7 @@ func AddUsersLocation(lat, long, chatId int) {
 		Latitude:  lat,
 		Longitude: long,
 	}
-	_, err := o.Insert(usersLoc)
-	log.Error(err)
+	o.Insert(usersLoc)
 }
 
 func IfLocationExist(chatId int) bool {
@@ -54,4 +53,14 @@ func AddUserLocationCity(chatId int, city string) {
 	o.QueryTable(new(UsersLocations)).Filter("user_id", user.Id).One(&loc)
 	loc.City = city
 	o.Update(&loc)
+}
+
+func GetUsersCoords(chatId int) (lat, lon int) {
+	log.Info("GetUsersCoords")
+	o := orm.NewOrm()
+	var user Users
+	o.QueryTable(new(Users)).Filter("chat_id", chatId).One(&user)
+	var loc UsersLocations
+	o.QueryTable(new(UsersLocations)).Filter("user_id", user.Id).One(&loc)
+	return loc.Latitude, loc.Longitude
 }

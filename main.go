@@ -1,10 +1,11 @@
 package main
 
 import (
+	"telegram-bot/exchange_rates"
 	"telegram-bot/models"
 	"telegram-bot/services"
 	"telegram-bot/services/db"
-	"time"
+	"telegram-bot/weather"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -14,9 +15,10 @@ import (
 // кнопки над клавиатурой
 var mainKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonURL("  Pornhub  ", "http://pornhub.com"),
-		tgbotapi.NewInlineKeyboardButtonSwitch("2sw", "open 2"),
-		tgbotapi.NewInlineKeyboardButtonData("3", "3"),
+		//tgbotapi.NewInlineKeyboardButtonURL("  Pornhub  ", "http://pornhub.com"),
+		tgbotapi.NewInlineKeyboardButtonSwitch("Share bot", "open bot"),
+		tgbotapi.NewInlineKeyboardButtonData("  Rates  ", "rates"),
+		tgbotapi.NewInlineKeyboardButtonData("  Weather  ", "weather"),
 	),
 	tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("4", "4"),
@@ -28,9 +30,9 @@ var mainKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 func main() {
 	// init DB
 	db.InitDB()
-
-	var conf services.Config
 	var err error
+	var conf services.Config
+
 	if conf, err = services.GetConfig(); err != nil {
 		log.Error(err)
 	}
@@ -42,10 +44,13 @@ func main() {
 
 	bot.Debug = false
 	log.Info("Authorized on account ", bot.Self.UserName)
-
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
+	// TODO: send direct message
+	//msg := tgbotapi.NewMessage(130421447,  "ffffff")
+	//bot.Send(msg)
+	//
 	updates, err := bot.GetUpdatesChan(u)
 	if err != nil {
 		log.Error(err)
@@ -53,28 +58,55 @@ func main() {
 
 	// Optional: wait for updates and clear them if you don't want to handle
 	// a large backlog of old messages
-	time.Sleep(time.Millisecond * 500)
-	updates.Clear()
+	//time.Sleep(time.Second * 5)
+	//updates.Clear()
 
 	for update := range updates {
-		//if update.CallbackQuery != nil {
-		//	log.Info(update)
-		//
-		//	bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data))
-		//
-		//	bot.Send(tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data))
-		//
-		//}
+
+		// catch when user push the button
+		if update.CallbackQuery != nil {
+			//bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data))
+			//bot.Send(tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data))
+			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
+
+			switch update.CallbackQuery.Data {
+			case "weather":
+				// check if user have saved location
+				locExist := models.IfLocationExist(int(update.CallbackQuery.Message.Chat.ID))
+
+				if !locExist {
+					msg.Text = "Hi! Sorry, but I don't have your location :( \nSend me your location and I'll remember it"
+					bot.Send(msg)
+
+				} else {
+					lat, lon := models.GetUsersCoords(int(update.CallbackQuery.Message.Chat.ID))
+					weatherInfo, _ := weather.GetOpenWeather(int(update.CallbackQuery.Message.Chat.ID), lat, lon)
+					msg.Text = weatherInfo
+					log.Info("send weather")
+					msg.ReplyMarkup = mainKeyboard
+					bot.Send(msg)
+				}
+
+			case "rates":
+				var rates string
+
+				if rates, err = exchange_rates.GetRates(); err != nil {
+					log.Error(err)
+				}
+				msg.Text = rates
+				msg.ReplyMarkup = mainKeyboard
+				log.Info("send rates")
+				bot.Send(msg)
+			}
+		}
 
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
 		}
 
 		if update.Message != nil {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-			log.Info(update.Message.Chat.LastName)
-			log.Info(update.Message.Chat.FirstName)
-			log.Info(update.Message.Chat.ID)
+			//msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "choose you category")
 
 			user := &models.Users{
 				UserName:  update.Message.Chat.UserName,
@@ -82,39 +114,30 @@ func main() {
 				LastName:  update.Message.Chat.LastName,
 				ChatID:    int(update.Message.Chat.ID),
 			}
-			fl, err := models.AddUser(user)
-			log.Error(err)
-			log.Error(fl)
-			//dbcon.NewRecord(user)// => returns `true` as primary key is blank
-			//dbcon.Create(&user)
-			//dbcon.NewRecord(user) // => return `false` after `user` created
+			// add new user
+			models.AddNewUser(user)
+
+			// case when user sent location
+			if update.Message.Location != nil {
+				log.Info("user send location")
+				models.AddUsersLocation(int(update.Message.Location.Latitude), int(update.Message.Location.Longitude),
+					int(update.Message.Chat.ID))
+
+				weatherInfo, _ := weather.GetOpenWeather(int(update.Message.Chat.ID),
+					int(update.Message.Location.Latitude), int(update.Message.Location.Longitude))
+				msg.Text = weatherInfo
+				log.Info("send weather info")
+			}
 
 			switch update.Message.Text {
 			case "/start":
 				msg.ReplyMarkup = mainKeyboard
-				log.Info(44)
-				bot.Send(msg)
 			}
+			msg.ReplyMarkup = mainKeyboard
+			log.Info("send main keys")
+			bot.Send(msg)
 		}
-
 		log.Info(update.Message.From.UserName, " sent ", update.Message.Text)
-
-		//handling user commands
-		//if update.Message.IsCommand() {
-		//	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
-		//	switch update.Message.Command() {
-		//	case "help":
-		//		msg.Text = "type /sayhi or /status."
-		//	//case "sayhi":
-		//	//	msg.Text = "Hi :)"
-		//	case "start":
-		//		msg.ReplyMarkup = mainKeyboard
-		//		bot.Send(msg)
-		//		log.Info(44)
-		//	default:
-		//		msg.Text = "I don't know that command"
-		//	}
-		//	bot.Send(msg)
 
 		//} else {
 		//	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "you say "+ update.Message.Text)
@@ -126,5 +149,4 @@ func main() {
 		//}
 		//}
 	}
-
 }

@@ -8,6 +8,8 @@ import (
 	"telegram-bot/services"
 	"time"
 
+	"github.com/labstack/gommon/log"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -73,7 +75,8 @@ type WeatherDataBundle struct {
 	Cod      int       `json:"cod"`
 }
 
-func GetWeather() (string, error) {
+func GetOpenWeather(chatId, lat, lon int) (string, error) {
+	log.Info("GetOpenWeather")
 	var conf services.Config
 	var err error
 
@@ -81,15 +84,14 @@ func GetWeather() (string, error) {
 		return "", err
 	}
 	client := http.Client{}
-	//url := "https://api.openweathermap.org/data/2.5/weather?lat=47&lon=35&units=metric&appid=" + appid
 	var req *http.Request
 
 	if req, err = http.NewRequest("GET", "https://api.openweathermap.org/data/2.5/weather", nil); err != nil {
 		return "", err
 	}
 	q := req.URL.Query()
-	q.Add("lat", "47")
-	q.Add("lon", "35")
+	q.Add("lat", strconv.Itoa(lat))
+	q.Add("lon", strconv.Itoa(lon))
 	q.Add("units", "metric")
 	q.Add("appid", conf.WeatherAppId)
 	req.URL.RawQuery = q.Encode()
@@ -113,6 +115,7 @@ func GetWeather() (string, error) {
 }
 
 func (w WeatherDataBundle) String() string {
+	log.Info("WeatherDataBundle  String()")
 	sunriseInfo, _ := strconv.ParseInt(strconv.Itoa(w.Sys.Sunrise), 10, 64)
 	sunriseTime := time.Unix(sunriseInfo, 0)
 
@@ -120,12 +123,12 @@ func (w WeatherDataBundle) String() string {
 	sunsetTime := time.Unix(sunsetInfo, 0)
 
 	res := "Description: " + w.Weather[0].Description +
-		"\nTemp: " + strconv.Itoa(int(w.Main.Temp)) +
-		"\nFeels like: " + strconv.Itoa(int(w.Main.FeelsLike)) +
-		"\nHumidity: " + strconv.Itoa(w.Main.Humidity) +
-		"\nWind: " + strconv.Itoa(int(w.Wind.Speed)) +
-		"\nSunrise: " + strconv.Itoa(sunriseTime.Hour()) + ":" + strconv.Itoa(sunriseTime.Minute()) +
-		"\nSunset: " + strconv.Itoa(sunsetTime.Hour()) + ":" + strconv.Itoa(sunsetTime.Minute()) +
+		"\nTemp: " + strconv.Itoa(int(w.Main.Temp)) + "°C" +
+		"\nFeels like: " + strconv.Itoa(int(w.Main.FeelsLike)) + "°C" +
+		"\nHumidity: " + strconv.Itoa(w.Main.Humidity) + "%" +
+		"\nWind: " + strconv.Itoa(int(w.Wind.Speed)) + " meter/sec" +
+		"\nSunrise: " + strconv.Itoa(sunriseTime.Hour()) + ":" + strconv.Itoa(sunriseTime.Minute()) + " a.m." +
+		"\nSunset: " + strconv.Itoa(sunsetTime.Hour()) + ":" + strconv.Itoa(sunsetTime.Minute()) + " p.m." +
 		"\nLocation: " + w.Name
 	return res
 }

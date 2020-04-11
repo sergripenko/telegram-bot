@@ -1,3 +1,3 @@
 development:
     driver: postgres
-    open: user=homestead dbname=unitonomy password=secret host=127.0.0.1 port=54320 sslmode=disable
+    open: user=homestead dbname=telegram_bot password=secret host=127.0.0.1 port=54320 sslmode=disable

@@ -42,14 +42,14 @@ ALTER ROLE admin SET default_transaction_isolation TO 'read committed';
 
 ALTER ROLE admin SET timezone TO 'UTC';
 
-GRANT ALL PRIVILEGES ON DATABASE unitonomy TO admin;
+GRANT ALL PRIVILEGES ON DATABASE telegram_bot TO admin;
 
 ALTER USER admin CREATEDB;
 
 \q
 ```
 ## 2: Getting Started
-#### Inside repo.udtech.co/unitonomy/db directory create "dbconf.yml" file with such content:
+#### Inside repo.udtech.co/telegram-bot/db directory create "dbconf.yml" file with such content:
 ```bash
 development:
     driver: postgres
